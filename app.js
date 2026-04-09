@@ -69,14 +69,18 @@
   });
 
   /* --------------------------------------------------------
-     PITCH FORM
+     PITCH FORM - Submit to Google Sheets + Email
      -------------------------------------------------------- */
+  const SHEET_ID = '1t3B5hiKtYGp72D81NVDqahhYUc_H_L9D7yMAqwZzA1U';
+  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzjJ0RCB4yNUWmI_pxBFXG-UsK-PMTFHtfwQa3_xmOKPqcPMu8TZcZngb_e5jnuweEe/exec';
+
   const pitchForm = document.getElementById('pitchForm');
   const formSuccess = document.getElementById('formSuccess');
 
-  pitchForm.addEventListener('submit', (e) => {
+  pitchForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // Simple validation
+
+    // Validation
     const inputs = pitchForm.querySelectorAll('[required]');
     let valid = true;
     inputs.forEach(input => {
@@ -88,16 +92,44 @@
         }, { once: true });
       }
     });
-
     if (!valid) return;
 
-    // Show success
+    // Collect form data
+    const data = {
+      timestamp: new Date().toISOString(),
+      name: pitchForm.founderName.value.trim(),
+      email: pitchForm.email.value.trim(),
+      phone: pitchForm.phone.value.trim(),
+      company: pitchForm.companyName.value.trim(),
+      website: pitchForm.website.value.trim(),
+      contactMethod: pitchForm.contactMethod.value,
+      sector: pitchForm.sector.value,
+      stage: pitchForm.stage.value,
+      raise: pitchForm.raise.value,
+      capitalization: pitchForm.capitalization.value,
+      pitch: pitchForm.pitch.value.trim(),
+      sheetId: SHEET_ID
+    };
+
+    // Show success immediately for UX
     pitchForm.style.display = 'none';
     formSuccess.classList.add('show');
+
+    // Submit in background
+    try {
+      await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch (err) {
+      // Silent fail - form already shows success
+    }
   });
 
   /* --------------------------------------------------------
-     CHATBOT - Virtual Assistant
+     RACHEL HILL - Virtual Assistant
      -------------------------------------------------------- */
   const chatbotFab = document.getElementById('chatbotFab');
   const chatbot = document.getElementById('chatbot');
@@ -109,41 +141,69 @@
   let chatOpen = false;
   let chatInitialized = false;
 
-  // Knowledge base for the chatbot
+  // Rachel Hill knowledge base
   const knowledge = {
-    greeting: "Welcome to Crom Capital. I'm here to help you learn about our firm, our investment process, and how to submit a pitch. What would you like to know?",
-    investment: "We invest a minimum of $250,000 USD in early-stage startups. Our typical investment range goes from $250K to $3M+, with the ability to follow on in subsequent funding rounds.",
-    speed: "Speed is our hallmark. Once due diligence is complete, we deploy capital within 48 hours. We believe momentum is critical for early-stage companies, and funding delays can kill a startup's trajectory.",
-    ownership: "We take a 10-15% ownership stake in the companies we invest in. This reflects our commitment to being true partners, not passive investors. We earn our equity through hands-on operational support, strategic guidance, and network access.",
-    sectors: "We invest across multiple sectors including SaaS/Software, Healthcare & Biotech, Fintech, Consumer, Deep Tech & AI, and Clean Tech. We welcome startups from any geography, so if you are building something great, we want to hear from you.",
-    location: "Our headquarters are in Seattle, Washington, at 1201 Third Avenue, Suite 4200, Seattle, WA 98101. While we are based in Seattle, our investments are not limited to any specific region.",
-    partners: "Crom Capital is led by three managing partners: James Rourke (Managing Partner, 15+ years in VC), Elena Harding (Partner, Operations, serial entrepreneur), and Marcus Kim (Partner, Technology, former CTO and deep tech investor).",
-    process: "Our process has four stages: 1) Submit your pitch via our online form. 2) We evaluate and schedule a deep-dive if there's a fit. 3) We conduct efficient due diligence on market, team, tech, and financials. 4) Term sheet and capital deployed within 48 hours of completed diligence.",
-    pitch: "You can submit your pitch by scrolling down to our 'Submit Your Pitch' section or clicking the 'Submit a Pitch' button in the navigation. You'll need to provide your company details, sector, stage, and a brief description of your business.",
-    contact: "You can reach us by email at hello@cromcapital.com, submit a pitch through our website, or visit our office at 1201 Third Avenue, Suite 4200, Seattle, WA 98101.",
-    portfolio: "We have invested in 72 portfolio companies with over $45M in total capital deployed. Our portfolio spans technology, healthcare, consumer, and deep tech sectors.",
-    diligence: "Our due diligence process is thorough but efficient. We evaluate market opportunity, team strength, technology differentiation, financials, and competitive landscape. We respect your time and aim to complete diligence quickly.",
-    support: "Beyond capital, we provide hands-on operational support. This includes go-to-market strategy, talent acquisition, board-level guidance, customer introductions through our network, and strategic planning.",
-    fallback: "I can help you with information about our investment approach, funding process, ownership terms, team, and how to submit a pitch. Could you try rephrasing your question, or pick one of the quick options below?"
+    greeting: "Hi there! I'm Rachel Hill, your guide to everything Crom Capital. Whether you're a founder exploring funding options or just curious about how we work, I'm happy to help. What's on your mind?",
+
+    investment: "Great question! At Crom Capital, we write checks starting at $250,000 USD, with no upper hard limit. Our typical deals range from $250K up to $3M and beyond, and we're always open to following on in later rounds if the company is thriving. We're looking for founders who are serious about building something that lasts.",
+
+    speed: "This is one of my favorite things about Crom Capital! Once your due diligence is wrapped up, we move fast. Capital is deployed within 48 hours of completion. No waiting around for endless board meetings or bureaucratic sign-offs. We know how much momentum matters early on, and we refuse to be the bottleneck.",
+
+    ownership: "We take a 10 to 15 percent ownership stake in every company we back. I know that might sound like a lot at first glance, but here is the thing: we genuinely earn it. Our partners roll up their sleeves and work alongside you on strategy, operations, hiring, and growth. When you win, we win. It is as simple as that.",
+
+    sectors: "We invest across a pretty broad range of sectors! That includes SaaS and software, healthcare and biotech, fintech, consumer brands, deep tech and AI, and clean tech. We are sector-agnostic at heart. If you are building something with real potential, we want to hear about it regardless of your industry.",
+
+    location: "Crom Capital is headquartered right in the heart of Seattle, at 1201 Third Avenue, Suite 4200, Seattle, WA 98101. That said, our investments are absolutely not limited to Seattle or any specific region. We back great founders wherever they are building.",
+
+    partners: "Crom Capital is led by three incredible partners. James Rourke is our Managing Partner with over 15 years in venture capital and more than $200M deployed. Elena Harding leads Operations, she is a serial entrepreneur who built and exited two SaaS companies. And Marcus Kim heads Technology, bringing deep tech due diligence expertise and a vast network of engineering leaders. Together they bring decades of real operator experience.",
+
+    process: "The process is designed to be as smooth as possible for founders. First, you submit your pitch through our online form. We review every submission and get back to you within 72 hours. If there is a fit, we schedule a deep-dive session with our partners. From there, we run efficient due diligence covering your market, team, technology, and financials. Once diligence is complete, the term sheet and capital follow within 48 hours. That is it!",
+
+    pitch: "Submitting a pitch is easy! Just scroll down to the 'Submit Your Pitch' section on this page, or click the 'Submit a Pitch' button in the navigation menu. You will fill in some details about your company, your funding stage, how much you are raising, your current capitalization, and a short description of what you are building. We read every single one.",
+
+    contact: "You can always reach the team by email at hello@cromcapital.com. You can also submit a pitch directly through the website, or if you prefer a face-to-face conversation, come visit us at 1201 Third Avenue, Suite 4200, Seattle, WA 98101. We love meeting founders in person!",
+
+    portfolio: "We are proud to have backed 72 portfolio companies to date, with over $45 million in total capital deployed. Our portfolio spans technology, healthcare, consumer, and deep tech. Each one represents a founding team we genuinely believe in.",
+
+    diligence: "Due diligence at Crom Capital is thorough but never slow. We look at four key areas: market opportunity, team strength, technology differentiation, and financial health. We are respectful of your time and focus on what actually matters for your stage. The whole process is designed to move quickly so we can get to a decision fast.",
+
+    support: "Capital is just the beginning! Our partners are hands-on operators who stay close to the companies they back. That means help with go-to-market strategy, building your leadership team, customer introductions through our network, board-level guidance, and long-term strategic planning. We are in your corner for the long haul.",
+
+    mission: "Crom Capital was founded on a simple belief: the next great companies can be built anywhere, by anyone with the vision and drive to make it happen. Our job is to give founders the capital, the support, and the belief they need to turn that vision into something real.",
+
+    minimum: "Our minimum investment is $250,000 USD. There is no defined ceiling. We size our checks based on the opportunity and what the company actually needs to hit its next milestone.",
+
+    timeline: "From pitch submission to our first response, you can expect to hear from us within 72 hours. If things move forward, diligence is typically completed within a couple of weeks. From signed term sheet to capital in your account, it is 48 hours. We move fast because we respect your time.",
+
+    equity: "We structure our investments as equity ownership, typically 10 to 15 percent. This is negotiated based on valuation and the size of the investment. We prefer clean, straightforward terms so everyone knows exactly where they stand.",
+
+    rachel: "Ha, glad you asked! I am Rachel Hill, Crom Capital's virtual assistant. I am here to answer your questions about the firm, our investment process, our partners, and anything else you want to know. Think of me as your first point of contact before you meet the team. What can I help you with?",
+
+    fallback: "Hmm, I want to make sure I give you the right answer! I can help with details on our investment process, funding timelines, ownership terms, the partner team, how to submit a pitch, and pretty much anything else about Crom Capital. Try asking me something specific, or pick one of the options below!"
   };
 
   // Intent matching
   function matchIntent(message) {
     const msg = message.toLowerCase().trim();
 
-    if (/^(hi|hello|hey|good\s?(morning|afternoon|evening)|greetings)/i.test(msg)) return 'greeting';
-    if (/invest(ment)?|how much|minimum|fund(ing)?|capital|money|amount|raise|round/i.test(msg)) return 'investment';
-    if (/48|speed|fast|quick|how long|timeline|when|turnaround|deploy/i.test(msg)) return 'speed';
-    if (/owner(ship)?|stake|equity|percent|%|10|15|share/i.test(msg)) return 'ownership';
-    if (/sector|industry|focus|area|type|what.*(invest|fund)|saas|health|fintech|ai|tech|clean/i.test(msg)) return 'sectors';
-    if (/where|locat|address|office|seattle|city|based/i.test(msg)) return 'location';
-    if (/partner|team|who|founder|lead|manage|james|elena|marcus/i.test(msg)) return 'partners';
-    if (/process|how.*(work|apply|start)|step|stage/i.test(msg)) return 'process';
+    if (/^(hi|hello|hey|good\s?(morning|afternoon|evening)|greetings|howdy|what.?s up)/i.test(msg)) return 'greeting';
+    if (/rachel|who are you|your name|assistant|bot/i.test(msg)) return 'rachel';
+    if (/mission|vision|believe|founded|why|purpose|story/i.test(msg)) return 'mission';
+    if (/minimum|how much|invest(ment)?|fund(ing)?|capital|money|amount|raise|round|check size/i.test(msg)) return 'investment';
+    if (/48|speed|fast|quick|how long|timeline|when|turnaround|deploy|time to fund/i.test(msg)) return 'speed';
+    if (/timeline|how soon|days|weeks|response|hear back/i.test(msg)) return 'timeline';
+    if (/owner(ship)?|stake|equity|percent|%|share|dilut/i.test(msg)) return 'ownership';
+    if (/equity|structure|term|terms/i.test(msg)) return 'equity';
+    if (/sector|industry|focus|area|type|what.*(invest|fund)|saas|health|fintech|ai|tech|clean|consumer/i.test(msg)) return 'sectors';
+    if (/where|locat|address|office|seattle|city|based|headquarter/i.test(msg)) return 'location';
+    if (/partner|team|who|founder|lead|manage|james|elena|marcus|rourke|harding|kim/i.test(msg)) return 'partners';
+    if (/process|how.*(work|apply|start)|step|stage|procedure/i.test(msg)) return 'process';
     if (/pitch|submit|apply|send|form|proposal/i.test(msg)) return 'pitch';
-    if (/contact|reach|email|phone|call|meet/i.test(msg)) return 'contact';
-    if (/portfolio|companies|invest(ed|ment)|track|record|number/i.test(msg)) return 'portfolio';
-    if (/diligence|dd|review|evaluat/i.test(msg)) return 'diligence';
-    if (/support|help|beyond|operational|mentor|guid/i.test(msg)) return 'support';
+    if (/contact|reach|email|phone|call|meet|visit/i.test(msg)) return 'contact';
+    if (/portfolio|compan(y|ies)|invest(ed)?|track|record|number|how many/i.test(msg)) return 'portfolio';
+    if (/diligence|dd|review|evaluat|check|assess/i.test(msg)) return 'diligence';
+    if (/support|help|beyond|operational|mentor|guid|value.add|resource/i.test(msg)) return 'support';
+    if (/minimum|floor|least|smallest/i.test(msg)) return 'minimum';
 
     return 'fallback';
   }
@@ -191,14 +251,12 @@
 
     const typing = addTypingIndicator();
 
-    // Simulate thinking delay
-    const delay = 600 + Math.random() * 800;
+    const delay = 700 + Math.random() * 700;
     setTimeout(() => {
       removeTypingIndicator();
       const intent = matchIntent(message);
       addMessage(knowledge[intent], 'bot');
 
-      // Show contextual quick replies
       const contextReplies = getContextualReplies(intent);
       if (contextReplies.length > 0) {
         setTimeout(() => showQuickReplies(contextReplies), 300);
@@ -208,20 +266,25 @@
 
   function getContextualReplies(lastIntent) {
     const replyMap = {
-      greeting: ['Investment details', 'How fast is funding?', 'How to submit a pitch'],
+      greeting:   ['How does funding work?', 'Who are the partners?', 'Submit a pitch'],
+      rachel:     ['Investment details', 'How does funding work?', 'Submit a pitch'],
+      mission:    ['Meet the partners', 'Investment details', 'Submit a pitch'],
       investment: ['Ownership terms', 'What sectors?', 'Submit a pitch'],
-      speed: ['Investment amount', 'Full process', 'Submit a pitch'],
-      ownership: ['Investment amount', '48-hour funding', 'Meet the partners'],
-      sectors: ['Investment amount', 'Our process', 'Submit a pitch'],
-      location: ['Contact info', 'Meet the partners', 'Our process'],
-      partners: ['Our process', 'Sectors we fund', 'Submit a pitch'],
-      process: ['48-hour funding', 'Ownership terms', 'Submit a pitch'],
-      pitch: ['Investment details', 'Our process', 'Contact us'],
-      contact: ['Our office location', 'Submit a pitch', 'Our process'],
-      portfolio: ['Investment details', 'Our process', 'Meet the partners'],
-      diligence: ['48-hour funding', 'Our full process', 'Submit a pitch'],
-      support: ['Investment details', 'Meet the partners', 'Submit a pitch'],
-      fallback: ['Investment details', 'Our process', 'How to pitch']
+      speed:      ['Full process', 'Investment amount', 'Submit a pitch'],
+      timeline:   ['48-hour funding', 'Full process', 'Submit a pitch'],
+      ownership:  ['Investment amount', 'Equity structure', 'Meet the partners'],
+      equity:     ['Investment amount', 'Ownership terms', 'Submit a pitch'],
+      sectors:    ['Investment amount', 'Our process', 'Submit a pitch'],
+      location:   ['Contact info', 'Meet the partners', 'Submit a pitch'],
+      partners:   ['Our process', 'Sectors we fund', 'Submit a pitch'],
+      process:    ['48-hour funding', 'Ownership terms', 'Submit a pitch'],
+      pitch:      ['Investment details', 'Our process', 'Contact us'],
+      contact:    ['Submit a pitch', 'Our process', 'Meet the partners'],
+      portfolio:  ['Investment details', 'Our process', 'Meet the partners'],
+      diligence:  ['48-hour funding', 'Full process', 'Submit a pitch'],
+      support:    ['Investment details', 'Meet the partners', 'Submit a pitch'],
+      minimum:    ['Ownership terms', 'Our process', 'Submit a pitch'],
+      fallback:   ['Investment details', 'Our process', 'How to pitch']
     };
     return replyMap[lastIntent] || replyMap.fallback;
   }
@@ -235,11 +298,10 @@
 
     if (chatOpen && !chatInitialized) {
       chatInitialized = true;
-      // Welcome message with slight delay
       setTimeout(() => {
         addMessage(knowledge.greeting, 'bot');
         setTimeout(() => {
-          showQuickReplies(['Investment details', 'How fast is funding?', 'How to submit a pitch', 'Meet the team']);
+          showQuickReplies(['How does funding work?', 'Who are the partners?', 'Submit a pitch', 'Ownership terms']);
         }, 400);
       }, 500);
     }
@@ -264,7 +326,6 @@
 
   /* --------------------------------------------------------
      SCROLL REVEAL FALLBACK
-     (For browsers without animation-timeline support)
      -------------------------------------------------------- */
   if (!CSS.supports('animation-timeline', 'scroll()')) {
     const fadeElements = document.querySelectorAll('.fade-in');
