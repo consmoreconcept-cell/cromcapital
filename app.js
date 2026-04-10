@@ -208,11 +208,29 @@
     return 'fallback';
   }
 
-  function addMessage(text, type) {
+  function addMessage(text, type, hasAction) {
     const msg = document.createElement('div');
     msg.className = `chatbot__message chatbot__message--${type}`;
     msg.textContent = text;
     chatMessages.appendChild(msg);
+
+    if (hasAction === 'pitch') {
+      const btnWrap = document.createElement('div');
+      btnWrap.style.marginTop = '10px';
+      const btn = document.createElement('a');
+      btn.href = '#pitch';
+      btn.className = 'chatbot__action-btn';
+      btn.textContent = 'Submit Your Pitch';
+      btn.addEventListener('click', () => {
+        chatbotFab.click();
+        setTimeout(() => {
+          document.getElementById('pitch').scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      });
+      btnWrap.appendChild(btn);
+      msg.appendChild(btnWrap);
+    }
+
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
@@ -255,7 +273,9 @@
     setTimeout(() => {
       removeTypingIndicator();
       const intent = matchIntent(message);
-      addMessage(knowledge[intent], 'bot');
+      const pitchIntents = ['pitch', 'process', 'investment', 'speed', 'timeline', 'greeting', 'minimum'];
+      const showPitchBtn = pitchIntents.includes(intent);
+      addMessage(knowledge[intent], 'bot', showPitchBtn ? 'pitch' : null);
 
       const contextReplies = getContextualReplies(intent);
       if (contextReplies.length > 0) {

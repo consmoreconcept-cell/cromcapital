@@ -1264,6 +1264,27 @@
   border-color: var(--color-accent);
 }
 
+.chatbot__action-btn {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 8px 18px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.chatbot__action-btn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
 .chatbot__input-area {
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--color-border);
