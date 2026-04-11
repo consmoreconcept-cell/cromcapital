@@ -72,7 +72,7 @@
      PITCH FORM - Submit to Google Sheets + Email
      -------------------------------------------------------- */
   const SHEET_ID = '1t3B5hiKtYGp72D81NVDqahhYUc_H_L9D7yMAqwZzA1U';
-  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwH1smbPqR8wrttwCV1Xjreu6txybWMn7bAKsiVq5qK4ie-4qQkmZjW0DS8323aQZw/exec';
+  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyga6WlxgKMRPA7_iB_349aH7DwWrRRKoZWpUlutJP-RK7S-BSRhmzs4pwAbmxNCCzq/exec';
 
   const pitchForm = document.getElementById('pitchForm');
   const formSuccess = document.getElementById('formSuccess');
