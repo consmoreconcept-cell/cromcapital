@@ -72,7 +72,7 @@
      PITCH FORM - Submit to Google Sheets + Email
      -------------------------------------------------------- */
   const SHEET_ID = '1t3B5hiKtYGp72D81NVDqahhYUc_H_L9D7yMAqwZzA1U';
-  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzjJ0RCB4yNUWmI_pxBFXG-UsK-PMTFHtfwQa3_xmOKPqcPMu8TZcZngb_e5jnuweEe/exec';
+  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwH1smbPqR8wrttwCV1Xjreu6txybWMn7bAKsiVq5qK4ie-4qQkmZjW0DS8323aQZw/exec';
 
   const pitchForm = document.getElementById('pitchForm');
   const formSuccess = document.getElementById('formSuccess');
@@ -115,14 +115,14 @@
     pitchForm.style.display = 'none';
     formSuccess.classList.add('show');
 
-    // Submit in background
+    // Submit in background via GET (most reliable with Google Apps Script)
     try {
-      await fetch(FORM_ENDPOINT, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      const params = new URLSearchParams(data).toString();
+      const img = new Image();
+      img.src = FORM_ENDPOINT + '?' + params;
+
+      // Also try fetch as backup
+      fetch(FORM_ENDPOINT + '?' + params, { mode: 'no-cors' }).catch(() => {});
     } catch (err) {
       // Silent fail - form already shows success
     }
