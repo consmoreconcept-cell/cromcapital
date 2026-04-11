@@ -120,9 +120,6 @@
       const params = new URLSearchParams(data).toString();
       const img = new Image();
       img.src = FORM_ENDPOINT + '?' + params;
-
-      // Also try fetch as backup
-      fetch(FORM_ENDPOINT + '?' + params, { mode: 'no-cors' }).catch(() => {});
     } catch (err) {
       // Silent fail - form already shows success
     }
