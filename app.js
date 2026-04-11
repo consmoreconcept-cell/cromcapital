@@ -115,11 +115,15 @@
     pitchForm.style.display = 'none';
     formSuccess.classList.add('show');
 
-    // Submit in background via GET (most reliable with Google Apps Script)
+    // Submit in background via hidden iframe (reliable cross-origin to Google Apps Script)
     try {
       const params = new URLSearchParams(data).toString();
-      const img = new Image();
-      img.src = FORM_ENDPOINT + '?' + params;
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.name = 'pitchSubmitFrame';
+      document.body.appendChild(iframe);
+      iframe.src = FORM_ENDPOINT + '?' + params;
+      setTimeout(() => iframe.remove(), 15000);
     } catch (err) {
       // Silent fail - form already shows success
     }
